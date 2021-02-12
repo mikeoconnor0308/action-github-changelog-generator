@@ -141,6 +141,12 @@ github_changelog_generator \
   "${ARG_ISSUESLABEL[@]}" \
   "${ARG_PRLABEL[@]}"
 
+# Exit with error if changelog generator fails
+if [ $? != 0 ]; then 
+  echo "Changelog generation failed!"
+  exit 1
+fi
+
 # Locate change log.
 FILE="CHANGELOG.md"
 if [ -n "$INPUT_OUTPUT" ]; then FILE="$INPUT_OUTPUT"; fi

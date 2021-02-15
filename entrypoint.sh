@@ -1,8 +1,8 @@
 #!/bin/bash
-istrue () {
+istrue() {
   case $1 in
-    "true"|"yes"|"y") return 0;;
-    *) return 1;;
+  "true" | "yes" | "y") return 0 ;;
+  *) return 1 ;;
   esac
 }
 
@@ -16,10 +16,9 @@ fi
 # Set repository from GitHub, if not set.
 if [ -z "$INPUT_REPO" ]; then INPUT_REPO="$GITHUB_REPOSITORY"; fi
 # Set user input from repository, if not set.
-if [ -z "$INPUT_USER" ]; then INPUT_USER=$(echo "$INPUT_REPO" | cut -d / -f 1 ); fi
+if [ -z "$INPUT_USER" ]; then INPUT_USER=$(echo "$INPUT_REPO" | cut -d / -f 1); fi
 # Set project input from repository, if not set.
-if [ -z "$INPUT_PROJECT" ]; then INPUT_PROJECT=$(echo "$INPUT_REPO" | cut -d / -f 2- ); fi
-
+if [ -z "$INPUT_PROJECT" ]; then INPUT_PROJECT=$(echo "$INPUT_REPO" | cut -d / -f 2-); fi
 
 # Only show last tag.
 if istrue "$INPUT_ONLYLASTTAG"; then
@@ -83,9 +82,15 @@ if [ -n "$INPUT_SECURITYLABELS" ]; then ARG_SECURITYLABELS=(--security-labels "$
 if [ -n "$INPUT_ISSUESLABEL" ]; then ARG_ISSUESLABEL=(--issues-label "$INPUT_ISSUESLABEL"); fi
 if [ -n "$INPUT_PRLABEL" ]; then ARG_PRLABEL=(--pr-label "$INPUT_PRLABEL"); fi
 
+# TODO there's probably a better way to set up a gem installed from github.
+# Here, manually grab the bin path and set up the required lib path.
+GEN_PATH=$(bundle info github_changelog_generator | grep Path | awk '{print $2}')
+export RUBYLIB=${GEN_PATH}/lib/
+GEN_BIN=${GEN_PATH}/bin/github_changelog_generator
+
 # Generate change log.
 # shellcheck disable=SC2086 # We specifically want to allow word splitting.
-github_changelog_generator \
+${GEN_BIN} \
   $ARG_USER \
   $ARG_PROJECT \
   $ARG_TOKEN \
@@ -142,7 +147,7 @@ github_changelog_generator \
   "${ARG_PRLABEL[@]}"
 
 # Exit with error if changelog generator fails
-if [ $? != 0 ]; then 
+if [ $? != 0 ]; then
   echo "Changelog generation failed!"
   exit 1
 fi
